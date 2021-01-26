@@ -5,16 +5,17 @@ Add-Type -AssemblyName WindowsFormsIntegration | Out-Null
 [void][System.Windows.Forms.Application]::EnableVisualStyles()
 [Console]::OutputEncoding = [Text.UTF8Encoding]::UTF8
 $PSDefaultParameterValues['Out-File:Encoding'] = 'utf8bom'
-$scriptPath = $myinvocation.MyCommand.Definition
-$localFile = split-path -parent $scriptPath
 $wshell = New-Object -ComObject Wscript.Shell
-function LoadXml ($global:filename) {
-    $XamlLoader = (New-Object System.Xml.XmlDocument)
-    $XamlLoader.Load($filename)
-    return $XamlLoader
-}
 
+# function LoadXml ($global:filename) {
+#     $XamlLoader = (New-Object System.Xml.XmlDocument)
+#     $XamlLoader.Load($filename)
+#     return $XamlLoader
+# }
+# $scriptPath = $myinvocation.MyCommand.Definition
+# $localFile = split-path -parent $scriptPath
 # [Xml]$xaml = LoadXml("$localFile\gui.xaml")
+
 [Xml]$xaml = @"
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -101,8 +102,6 @@ function LoadXml ($global:filename) {
 </Window>
 "@
 
-
-# $script:slt = [hashtable]::Synchronized(@{})
 $Window = [Windows.Markup.XamlReader]::Load((New-Object -TypeName System.Xml.XmlNodeReader -ArgumentList $xaml))
 $xaml.SelectNodes("//*[@*[contains(translate(name(.),'n','N'),'Name')]]") | ForEach-Object -Process {
     Set-Variable -Name ($_.Name) -Value $window.FindName($_.Name) -Scope Script
